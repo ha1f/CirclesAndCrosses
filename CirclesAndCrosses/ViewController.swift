@@ -77,6 +77,8 @@ class GameManager {
     
     static let initialState: [[BoardCellState]] = [[.none, .none, .none], [.none, .none, .none], [.none, .none, .none]]
     
+    weak var delegate: GameManagerDelegate?
+    
     private func nextTurn() {
         switch turn {
         case .circle:
@@ -86,6 +88,7 @@ class GameManager {
         default:
             fatalError("unexpected turn .none!")
         }
+        delegate?.onChangeTurn(newValue: turn)
     }
     
     func isEmpty(at pos: BoardCellPosition) -> Bool {
@@ -96,19 +99,18 @@ class GameManager {
         return states[pos.y][pos.x]
     }
     
-    func trySetState(_ value: BoardCellState, at pos: BoardCellPosition) -> GameManagerChange {
+    func trySetState(_ value: BoardCellState, at pos: BoardCellPosition) {
         if isEmpty(at: pos) {
             states[pos.y][pos.x] = value
             nextTurn()
-            return GameManagerChange.state(pos: pos, newValue: value)
+            delegate?.onChangeState(at: pos, newValue: value)
         }
-        return GameManagerChange.none
     }
 }
 
-enum GameManagerChange {
-    case none
-    case state(pos: BoardCellPosition, newValue: BoardCellState)
+protocol GameManagerDelegate: class {
+    func onChangeState(at pos: BoardCellPosition, newValue: BoardCellState)
+    func onChangeTurn(newValue: BoardCellState)
 }
 
 // turn, statesがviewModelとして必要
@@ -123,6 +125,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
         
         boardView.setInitialStates(manager.states)
+        manager.delegate = self
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onTappedBoardView(sender:)))
         self.boardView.addGestureRecognizer(tapGestureRecognizer)
@@ -130,13 +133,16 @@ class ViewController: UIViewController {
     
     func onTappedBoardView(sender: UITapGestureRecognizer) {
         let pos = boardView.posFor(locationInView: sender.location(in: boardView))
-        let change = manager.trySetState(manager.turn, at: pos)
-        switch change {
-        case .state(let pos, let newValue):
-            boardView.put(newValue, at: pos)
-        default:
-            break
-        }
+        manager.trySetState(manager.turn, at: pos)
     }
 
+}
+
+extension ViewController: GameManagerDelegate {
+    func onChangeState(at pos: BoardCellPosition, newValue: BoardCellState) {
+        boardView.put(newValue, at: pos)
+    }
+    func onChangeTurn(newValue: BoardCellState) {
+        
+    }
 }
