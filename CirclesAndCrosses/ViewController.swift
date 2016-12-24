@@ -38,6 +38,11 @@ class BoardView: UIStackView {
     private var cellViews = [[BoardCellView]]()
     
     func setInitialStates(_ statess: [[BoardCellState]]) {
+        self.cellViews.forEach { cellViews in
+            cellViews.forEach { cellView in
+                cellView.removeFromSuperview()
+            }
+        }
         self.cellViews = []
         self.axis = .vertical
         self.distribution = .fillEqually
@@ -91,6 +96,11 @@ class GameManager {
         delegate?.onChangeTurn(newValue: turn)
     }
     
+    func reset() {
+        states = GameManager.initialState
+        delegate?.onReset(states: states)
+    }
+    
     func isEmpty(at pos: BoardCellPosition) -> Bool {
         return getState(at: pos) == .none
     }
@@ -116,6 +126,7 @@ struct BoardCellStateChange {
 protocol GameManagerDelegate: class {
     func onChangeState(_ changes: [BoardCellStateChange])
     func onChangeTurn(newValue: BoardCellState)
+    func onReset(states: [[BoardCellState]])
 }
 
 // turn, statesがviewModelとして必要
@@ -129,11 +140,16 @@ class ViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        boardView.setInitialStates(manager.states)
         manager.delegate = self
         
         let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onTappedBoardView(sender:)))
         self.boardView.addGestureRecognizer(tapGestureRecognizer)
+        
+        startGame()
+    }
+    
+    private func startGame() {
+        manager.reset()
     }
     
     func onTappedBoardView(sender: UITapGestureRecognizer) {
@@ -144,6 +160,9 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: GameManagerDelegate {
+    func onReset(states: [[BoardCellState]]) {
+        boardView.setInitialStates(states)
+    }
     func onChangeState(_ changes: [BoardCellStateChange]) {
         changes.forEach { change in
             boardView.put(change.newValue, at: change.pos)
