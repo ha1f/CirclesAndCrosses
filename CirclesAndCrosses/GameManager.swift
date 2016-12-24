@@ -84,6 +84,16 @@ class GameManager {
                 return
             }
         }
+        
+        // 引き分け判定
+        for states in states {
+            for state in states {
+                if state == .none {
+                    return
+                }
+            }
+        }
+        self.gameState = .finished(win: nil)
     }
     
     func reset() {

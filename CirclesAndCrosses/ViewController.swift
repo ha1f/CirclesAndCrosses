@@ -57,7 +57,13 @@ extension ViewController: GameManagerDelegate {
     func onChangeGameState(newValue: GameState) {
         switch newValue {
         case .finished(let winner):
-            let controller = UIAlertController(title: "ゲーム終了", message: "\(winner)の勝利", preferredStyle: .alert)
+            let message: String
+            if let winner = winner {
+                message = "\(winner)の勝利"
+            } else {
+                message = "引き分け"
+            }
+            let controller = UIAlertController(title: "ゲーム終了", message: message, preferredStyle: .alert)
             let okAction = UIAlertAction(title: "もう一度", style: .default, handler: {[weak self] _ in
                 self?.restartGame()
             })
