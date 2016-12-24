@@ -103,13 +103,18 @@ class GameManager {
         if isEmpty(at: pos) {
             states[pos.y][pos.x] = value
             nextTurn()
-            delegate?.onChangeState(at: pos, newValue: value)
+            delegate?.onChangeState([BoardCellStateChange(pos: pos, newValue: value)])
         }
     }
 }
 
+struct BoardCellStateChange {
+    var pos: BoardCellPosition
+    var newValue: BoardCellState
+}
+
 protocol GameManagerDelegate: class {
-    func onChangeState(at pos: BoardCellPosition, newValue: BoardCellState)
+    func onChangeState(_ changes: [BoardCellStateChange])
     func onChangeTurn(newValue: BoardCellState)
 }
 
@@ -139,8 +144,10 @@ class ViewController: UIViewController {
 }
 
 extension ViewController: GameManagerDelegate {
-    func onChangeState(at pos: BoardCellPosition, newValue: BoardCellState) {
-        boardView.put(newValue, at: pos)
+    func onChangeState(_ changes: [BoardCellStateChange]) {
+        changes.forEach { change in
+            boardView.put(change.newValue, at: change.pos)
+        }
     }
     func onChangeTurn(newValue: BoardCellState) {
         
