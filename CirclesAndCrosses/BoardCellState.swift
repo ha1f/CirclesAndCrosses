@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum BoardCellState {
+enum BoardCellState: Int {
     case circle
     case cross
     case none

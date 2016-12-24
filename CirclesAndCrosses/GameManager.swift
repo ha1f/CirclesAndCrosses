@@ -12,6 +12,7 @@ protocol GameManagerDelegate: class {
     func onChangeState(_ changes: [BoardCellStateChange])
     func onChangeTurn(newValue: BoardCellState)
     func onReset(states: [[BoardCellState]])
+    func onChangeGameState(newValue: GameState)
 }
 
 class GameManager {
@@ -20,7 +21,16 @@ class GameManager {
             delegate?.onChangeTurn(newValue: turn)
         }
     }
-    private(set) var states = GameManager.initialState
+    private(set) var states = GameManager.initialState {
+        didSet {
+            checkGameState()
+        }
+    }
+    private var gameState = GameState.inGame {
+        didSet {
+            delegate?.onChangeGameState(newValue: gameState)
+        }
+    }
     
     static let initialState: [[BoardCellState]] = [[.none, .none, .none], [.none, .none, .none], [.none, .none, .none]]
     static let initialTurn = BoardCellState.circle
@@ -38,7 +48,46 @@ class GameManager {
         }
     }
     
+    func checkGameState() {
+        for states in states {
+            if let v = states.reduce(states.first, { $0 == $1 ? $0 : nil }), v != .none {
+                // 横にすべて等しい
+                self.gameState = .finished(win: v)
+                return
+            }
+        }
+        for i in 0..<states.first!.count {
+            let states = self.states.map({ states in states[i] })
+            if let v = states.reduce(states.first, { $0 == $1 ? $0 : nil }), v != .none {
+                // 縦にすべて等しい
+                self.gameState = .finished(win: v)
+                return
+            }
+        }
+        let count = states.count
+        if count == states.first!.count {
+            // 斜め判定可能
+            // 右斜
+            let states1 = (0..<count).map({ i in
+                return self.states[i][i]
+            })
+            if let v = states1.reduce(states1.first, { $0 == $1 ? $0 : nil }), v != .none {
+                self.gameState = .finished(win: v)
+                return
+            }
+            // 左斜め
+            let states2 = (0..<count).map({ i -> BoardCellState in
+                return self.states[i][count - i - 1]
+            })
+            if let v = states2.reduce(states2.first, { $0 == $1 ? $0 : nil }), v != .none {
+                self.gameState = .finished(win: v)
+                return
+            }
+        }
+    }
+    
     func reset() {
+        gameState = GameState.inGame
         states = GameManager.initialState
         turn = GameManager.initialTurn
         delegate?.onReset(states: states)
@@ -53,10 +102,15 @@ class GameManager {
     }
     
     func trySetState(_ value: BoardCellState, at pos: BoardCellPosition) {
-        if isEmpty(at: pos) {
-            states[pos.y][pos.x] = value
-            nextTurn()
-            delegate?.onChangeState([BoardCellStateChange(pos: pos, newValue: value)])
+        switch gameState {
+        case .inGame:
+            if isEmpty(at: pos) {
+                states[pos.y][pos.x] = value
+                nextTurn()
+                delegate?.onChangeState([BoardCellStateChange(pos: pos, newValue: value)])
+            }
+        default:
+            break
         }
     }
 }

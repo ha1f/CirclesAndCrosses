@@ -16,6 +16,7 @@
 		845295191E0E4977009B5E43 /* BoardCellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845295181E0E4977009B5E43 /* BoardCellView.swift */; };
 		8452951B1E0E49A4009B5E43 /* BoardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8452951A1E0E49A4009B5E43 /* BoardView.swift */; };
 		8452951D1E0E49EA009B5E43 /* BoardCellState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8452951C1E0E49EA009B5E43 /* BoardCellState.swift */; };
+		845295211E0E4C17009B5E43 /* GameState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845295201E0E4C17009B5E43 /* GameState.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -30,6 +31,7 @@
 		845295181E0E4977009B5E43 /* BoardCellView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoardCellView.swift; sourceTree = "<group>"; };
 		8452951A1E0E49A4009B5E43 /* BoardView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoardView.swift; sourceTree = "<group>"; };
 		8452951C1E0E49EA009B5E43 /* BoardCellState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BoardCellState.swift; sourceTree = "<group>"; };
+		845295201E0E4C17009B5E43 /* GameState.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GameState.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,6 +65,7 @@
 			isa = PBXGroup;
 			children = (
 				845295041E0E27CA009B5E43 /* AppDelegate.swift */,
+				845295201E0E4C17009B5E43 /* GameState.swift */,
 				845295161E0E4944009B5E43 /* GameManager.swift */,
 				8452951C1E0E49EA009B5E43 /* BoardCellState.swift */,
 				8452951A1E0E49A4009B5E43 /* BoardView.swift */,
@@ -148,6 +151,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				845295211E0E4C17009B5E43 /* GameState.swift in Sources */,
 				845295071E0E27CA009B5E43 /* ViewController.swift in Sources */,
 				845295191E0E4977009B5E43 /* BoardCellView.swift in Sources */,
 				8452951B1E0E49A4009B5E43 /* BoardView.swift in Sources */,
@@ -315,6 +319,7 @@
 				845295151E0E27CA009B5E43 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

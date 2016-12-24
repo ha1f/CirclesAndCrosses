@@ -31,7 +31,7 @@ class ViewController: UIViewController {
         restartGame()
     }
     
-    private func restartGame() {
+    func restartGame() {
         manager.reset()
     }
     
@@ -53,5 +53,18 @@ extension ViewController: GameManagerDelegate {
     }
     func onChangeTurn(newValue: BoardCellState) {
         
+    }
+    func onChangeGameState(newValue: GameState) {
+        switch newValue {
+        case .finished(let winner):
+            let controller = UIAlertController(title: "ゲーム終了", message: "\(winner)の勝利", preferredStyle: .alert)
+            let okAction = UIAlertAction(title: "もう一度", style: .default, handler: {[weak self] _ in
+                self?.restartGame()
+            })
+            controller.addAction(okAction)
+            self.present(controller, animated: true, completion: nil)
+        default:
+            break
+        }
     }
 }

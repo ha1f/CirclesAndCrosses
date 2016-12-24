@@ -14,6 +14,7 @@ class BoardView: UIStackView {
     func setInitialStates(_ statess: [[BoardCellState]]) {
         self.cellViews.forEach { cellViews in
             cellViews.forEach { cellView in
+                cellView.superview?.removeFromSuperview()
                 cellView.removeFromSuperview()
             }
         }
