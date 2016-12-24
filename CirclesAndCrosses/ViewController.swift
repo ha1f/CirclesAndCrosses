@@ -10,22 +10,28 @@ import UIKit
 
 class ViewController: UIViewController {
     
-    @IBOutlet weak var boardView: BoardView!
+    @IBOutlet weak var boardView: BoardView! {
+        didSet {
+            let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onTappedBoardView(sender:)))
+            self.boardView.addGestureRecognizer(tapGestureRecognizer)
+        }
+    }
     
-    let manager = GameManager()
+    private var manager: GameManager! {
+        didSet {
+            manager.delegate = self
+        }
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        manager.delegate = self
+        manager = GameManager()
         
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onTappedBoardView(sender:)))
-        self.boardView.addGestureRecognizer(tapGestureRecognizer)
-        
-        startGame()
+        restartGame()
     }
     
-    private func startGame() {
+    private func restartGame() {
         manager.reset()
     }
     

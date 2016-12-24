@@ -15,10 +15,15 @@ protocol GameManagerDelegate: class {
 }
 
 class GameManager {
-    private(set) var turn = BoardCellState.circle
+    private(set) var turn = GameManager.initialTurn {
+        didSet {
+            delegate?.onChangeTurn(newValue: turn)
+        }
+    }
     private(set) var states = GameManager.initialState
     
     static let initialState: [[BoardCellState]] = [[.none, .none, .none], [.none, .none, .none], [.none, .none, .none]]
+    static let initialTurn = BoardCellState.circle
     
     weak var delegate: GameManagerDelegate?
     
@@ -31,11 +36,11 @@ class GameManager {
         default:
             fatalError("unexpected turn .none!")
         }
-        delegate?.onChangeTurn(newValue: turn)
     }
     
     func reset() {
         states = GameManager.initialState
+        turn = GameManager.initialTurn
         delegate?.onReset(states: states)
     }
     
