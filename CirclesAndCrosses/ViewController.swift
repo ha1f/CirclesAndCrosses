@@ -71,29 +71,11 @@ class BoardView: UIStackView {
     }
 }
 
-// turn, statesがviewModelとして必要
-
-class ViewController: UIViewController {
-    
-    @IBOutlet weak var boardView: BoardView!
+class GameManager {
+    private(set) var turn = BoardCellState.circle
+    private(set) var states = GameManager.initialState
     
     static let initialState: [[BoardCellState]] = [[.none, .none, .none], [.none, .none, .none], [.none, .none, .none]]
-    
-    private var turn = BoardCellState.circle
-    private var states = [[BoardCellState]]()
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        setInitialiStates()
-        
-        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onTappedBoardView(sender:)))
-        self.boardView.addGestureRecognizer(tapGestureRecognizer)
-    }
-    
-    private func setInitialiStates() {
-        self.states = ViewController.initialState
-        boardView.setInitialStates(self.states)
-    }
     
     private func nextTurn() {
         switch turn {
@@ -106,24 +88,54 @@ class ViewController: UIViewController {
         }
     }
     
-    private func isEmpty(at pos: BoardCellPosition) -> Bool {
+    func isEmpty(at pos: BoardCellPosition) -> Bool {
         return getState(at: pos) == .none
     }
     
-    private func getState(at pos: BoardCellPosition) -> BoardCellState {
+    func getState(at pos: BoardCellPosition) -> BoardCellState {
         return states[pos.y][pos.x]
     }
     
-    private func setState(_ value: BoardCellState, at pos: BoardCellPosition) {
-        states[pos.y][pos.x] = value
-        boardView.put(turn, at: pos)
+    func trySetState(_ value: BoardCellState, at pos: BoardCellPosition) -> GameManagerChange {
+        if isEmpty(at: pos) {
+            states[pos.y][pos.x] = value
+            nextTurn()
+            return GameManagerChange.state(pos: pos, newValue: value)
+        }
+        return GameManagerChange.none
+    }
+}
+
+enum GameManagerChange {
+    case none
+    case state(pos: BoardCellPosition, newValue: BoardCellState)
+}
+
+// turn, statesがviewModelとして必要
+
+class ViewController: UIViewController {
+    
+    @IBOutlet weak var boardView: BoardView!
+    
+    let manager = GameManager()
+
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        
+        boardView.setInitialStates(manager.states)
+        
+        let tapGestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(self.onTappedBoardView(sender:)))
+        self.boardView.addGestureRecognizer(tapGestureRecognizer)
     }
     
     func onTappedBoardView(sender: UITapGestureRecognizer) {
         let pos = boardView.posFor(locationInView: sender.location(in: boardView))
-        if isEmpty(at: pos) {
-            setState(turn, at: pos)
-            nextTurn()
+        let change = manager.trySetState(manager.turn, at: pos)
+        switch change {
+        case .state(let pos, let newValue):
+            boardView.put(newValue, at: pos)
+        default:
+            break
         }
     }
 
