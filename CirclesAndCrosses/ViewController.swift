@@ -29,16 +29,24 @@ class BoardCellView: UIView {
     }
 }
 
+struct BoardCellPosition {
+    var x: Int
+    var y: Int
+}
+
 class BoardView: UIStackView {
     private var cellViews = [[BoardCellView]]()
     
     func setInitialStates(_ statess: [[BoardCellState]]) {
         self.cellViews = []
+        self.axis = .vertical
+        self.distribution = .fillEqually
         statess.forEach {states in
-            let stackView = UIStackView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+            let stackView = UIStackView()
             stackView.distribution = .fillEqually
+            stackView.axis = .horizontal
             let cellViews = states.map { state -> BoardCellView in
-                let cellView = BoardCellView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
+                let cellView = BoardCellView()
                 cellView.layer.borderWidth = 1
                 cellView.layer.borderColor = UIColor.black.cgColor
                 cellView.state = state
@@ -50,22 +58,18 @@ class BoardView: UIStackView {
             self.addArrangedSubview(stackView)
         }
         self.layoutIfNeeded()
-        print(cellViews)
     }
     
-    func put(_ value: BoardCellState, x: Int, y: Int) {
-        cellViews[y][x].state = value
+    func put(_ value: BoardCellState, at pos: BoardCellPosition) {
+        cellViews[pos.y][pos.x].state = value
     }
     
-    func posFor(locationInView: CGPoint) -> (Int, Int) {
+    func posFor(locationInView: CGPoint) -> BoardCellPosition {
         let x = Int(locationInView.x / (self.bounds.width / CGFloat(cellViews.first!.count)))
         let y = Int(locationInView.y / (self.bounds.height / CGFloat(cellViews.count)))
-        return (x, y)
+        return BoardCellPosition(x: x, y: y)
     }
-    
 }
-
-
 
 // turn, statesがviewModelとして必要
 
@@ -73,7 +77,7 @@ class ViewController: UIViewController {
     
     @IBOutlet weak var boardView: BoardView!
     
-    static let initialState: [[BoardCellState]] = [[.none, .circle, .none], [.none, .none, .none], [.none, .cross, .none]]
+    static let initialState: [[BoardCellState]] = [[.none, .none, .none], [.none, .none, .none], [.none, .none, .none]]
     
     private var turn = BoardCellState.circle
     private var states = [[BoardCellState]]()
@@ -102,23 +106,23 @@ class ViewController: UIViewController {
         }
     }
     
-    private func isEmptyAt(x: Int, y: Int) -> Bool {
-        return getState(x: x, y: y) == .none
+    private func isEmpty(at pos: BoardCellPosition) -> Bool {
+        return getState(at: pos) == .none
     }
     
-    private func getState(x: Int, y: Int) -> BoardCellState {
-        return states[y][x]
+    private func getState(at pos: BoardCellPosition) -> BoardCellState {
+        return states[pos.y][pos.x]
     }
     
-    private func setState(_ value: BoardCellState, x: Int, y: Int) {
-        states[y][x] = value
-        boardView.put(turn, x: x, y: y)
+    private func setState(_ value: BoardCellState, at pos: BoardCellPosition) {
+        states[pos.y][pos.x] = value
+        boardView.put(turn, at: pos)
     }
     
     func onTappedBoardView(sender: UITapGestureRecognizer) {
-        let (x, y) = boardView.posFor(locationInView: sender.location(in: boardView))
-        if isEmptyAt(x: x, y: y) {
-            setState(turn, x: x, y: y)
+        let pos = boardView.posFor(locationInView: sender.location(in: boardView))
+        if isEmpty(at: pos) {
+            setState(turn, at: pos)
             nextTurn()
         }
     }
