@@ -11,19 +11,18 @@ import UIKit
 enum BoardCellState {
     case circle
     case cross
+    case none
 }
 
 class BoardCellView: UIView {
-    var state: BoardCellState? {
+    var state: BoardCellState = .none {
         didSet {
-            if let state = state {
-                switch state {
-                case .circle:
-                    self.backgroundColor = UIColor.green
-                case .cross:
-                    self.backgroundColor = UIColor.red
-                }
-            } else {
+            switch state {
+            case .circle:
+                self.backgroundColor = UIColor.green
+            case .cross:
+                self.backgroundColor = UIColor.red
+            case .none:
                 self.backgroundColor = UIColor.white
             }
         }
@@ -33,7 +32,7 @@ class BoardCellView: UIView {
 class BoardView: UIStackView {
     private var cellViews = [[BoardCellView]]()
     
-    func setInitialStates(_ statess: [[BoardCellState?]]) {
+    func setInitialStates(_ statess: [[BoardCellState]]) {
         self.cellViews = []
         statess.forEach {states in
             let stackView = UIStackView(frame: CGRect(x: 0, y: 0, width: 100, height: 100))
@@ -54,7 +53,7 @@ class BoardView: UIStackView {
         print(cellViews)
     }
     
-    func put(_ value: BoardCellState?, x: Int, y: Int) {
+    func put(_ value: BoardCellState, x: Int, y: Int) {
         cellViews[y][x].state = value
     }
     
@@ -66,16 +65,18 @@ class BoardView: UIStackView {
     
 }
 
+
+
 // turn, statesがviewModelとして必要
 
 class ViewController: UIViewController {
     
     @IBOutlet weak var boardView: BoardView!
     
-    static let initialState: [[BoardCellState?]] = [[nil, .circle, nil], [nil, nil, nil], [nil, .cross, nil]]
+    static let initialState: [[BoardCellState]] = [[.none, .circle, .none], [.none, .none, .none], [.none, .cross, .none]]
     
     private var turn = BoardCellState.circle
-    private var states = [[BoardCellState?]]()
+    private var states = [[BoardCellState]]()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -96,18 +97,20 @@ class ViewController: UIViewController {
             turn = .cross
         case .cross:
             turn = .circle
+        default:
+            fatalError("unexpected turn .none!")
         }
     }
     
     private func isEmptyAt(x: Int, y: Int) -> Bool {
-        return getState(x: x, y: y) == nil
+        return getState(x: x, y: y) == .none
     }
     
-    private func getState(x: Int, y: Int) -> BoardCellState? {
+    private func getState(x: Int, y: Int) -> BoardCellState {
         return states[y][x]
     }
     
-    private func setState(_ value: BoardCellState?, x: Int, y: Int) {
+    private func setState(_ value: BoardCellState, x: Int, y: Int) {
         states[y][x] = value
         boardView.put(turn, x: x, y: y)
     }
